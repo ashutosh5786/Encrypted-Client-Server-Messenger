@@ -27,7 +27,6 @@ public class Client {
             out.println(userID); // Send the user's userID to the server immediately after connection
 
             // Read and display messages from the server
-            // Read and display messages from the server
             String serverMessage;
             int messageCount = 0;
             int messagesRead = 0;
@@ -47,20 +46,23 @@ public class Client {
                 }
             }
 
-            System.out.println("Enter recipient userID:");
-            System.out.flush();
-            String recipientUserID = userInput.readLine();
-            out.println(recipientUserID); // Send the recipient's userID to the server
-
-            System.out.println("Do you want to send a message? (y/n)");
-            System.out.flush();
-            String response = userInput.readLine();
-            if (response.equalsIgnoreCase("y")) {
-                System.out.println("Enter your message:");
+            String response;
+            do {
+                System.out.println("Do you want to send a message? (y/n)");
                 System.out.flush();
-                String message = userInput.readLine();
-                out.println(message); // Send the message to the server
-            }
+                response = userInput.readLine();
+                if (response.equalsIgnoreCase("y")) {
+                    System.out.println("Enter recipient userID:");
+                    System.out.flush();
+                    String recipientUserID = userInput.readLine();
+                    out.println(recipientUserID); // Send the recipient's userID to the server
+
+                    System.out.println("Enter your message:");
+                    System.out.flush();
+                    String message = userInput.readLine();
+                    out.println(message); // Send the message to the server
+                }
+            } while (response.equalsIgnoreCase("y"));
 
             System.out.println("Exiting...");
             socket.close();

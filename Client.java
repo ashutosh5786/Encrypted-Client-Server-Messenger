@@ -27,10 +27,22 @@ public class Client {
             out.println(userID); // Send the user's userID to the server immediately after connection
 
             // Read and display messages from the server
+            // Read and display messages from the server
             String serverMessage;
+            int messageCount = 0;
+            int messagesRead = 0;
             while ((serverMessage = in.readLine()) != null) {
-                System.out.println("Server: " + serverMessage);
-                if (serverMessage.equals("There are no messages for you.")) {
+                if (messageCount == 0) {
+                    // The first message from the server will be the number of messages
+                    String[] parts = serverMessage.split(" ");
+                    messageCount = Integer.parseInt(parts[2]); // The number of messages is the third word in the
+                                                               // message
+                    System.out.println("Server: " + serverMessage);
+                } else {
+                    System.out.println("Server: " + serverMessage);
+                    messagesRead++;
+                }
+                if (messagesRead >= messageCount) {
                     break;
                 }
             }

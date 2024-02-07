@@ -57,13 +57,16 @@ class ClientHandler extends Thread {
                     userName = message;
                     System.out.println("User ID: " + userName);
                     if (Server.userMessages.containsKey(userName)) {
+                        int messageCount = Server.userMessages.get(userName).size();
+                        out.println("There are " + messageCount + " message(s) for you.");
                         for (String msg : Server.userMessages.get(userName)) {
                             out.println(msg);
                         }
                         Server.userMessages.remove(userName);
                     } else {
-                        out.println("There are no messages for you.");
+                        out.println("There are 0 messages for you.");
                     }
+                    out.println("END"); // Send "END" after sending all messages or if there are no messages
                 } else if (recipientUserID == null) {
                     recipientUserID = message;
                     System.out.println("Recipient UserID: " + recipientUserID);

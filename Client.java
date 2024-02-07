@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Client {
     public static void main(String[] args) {
@@ -60,7 +62,8 @@ public class Client {
                     System.out.println("Enter your message:");
                     System.out.flush();
                     String message = userInput.readLine();
-                    out.println(message); // Send the message to the server
+                    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    out.println(timestamp + " " + message); // Send the timestamp and the message to the server
                 }
             } while (response.equalsIgnoreCase("y"));
 

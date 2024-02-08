@@ -13,7 +13,6 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("New client connected: " + clientSocket);
 
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clientHandler.start();
@@ -55,7 +54,7 @@ class ClientHandler extends Thread {
                 }
                 if (userName == null) {
                     userName = message;
-                    System.out.println("User ID: " + userName);
+                    System.out.println(userName + " connected");
                     if (Server.userMessages.containsKey(userName)) {
                         int messageCount = Server.userMessages.get(userName).size();
                         out.println("There are " + messageCount + " message(s) for you.");
@@ -71,6 +70,7 @@ class ClientHandler extends Thread {
                     recipientUserID = message;
                     System.out.println("Recipient UserID: " + recipientUserID);
                 } else {
+                    System.out.println("Incoming Message for " + recipientUserID + " from " + userName);
                     System.out.println("Received message for " + recipientUserID + ": " + message);
                     Server.broadcastMessage(message, recipientUserID); // Pass recipientUserID as second argument
                 }
@@ -94,3 +94,6 @@ class ClientHandler extends Thread {
         return userName;
     }
 }
+
+
+

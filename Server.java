@@ -49,9 +49,7 @@ public class Server {
         }
         userMessages.get(hashedRecipientUserID).add(message);
         // Print the sender and recipient user IDs, timestamp, and message contents
-        System.out.println("Incoming Message From:" + senderUserName);
-        System.out.println("Recipient: " + hashedRecipientUserID + " Timestamp: "
-                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        System.out.println("Incoming Message From " + senderUserName);
     }
 
 }
@@ -173,7 +171,8 @@ class ClientHandler extends Thread {
                                 decryptedMessage = decrypt(encryptedMessage, getPrivateKey("server"));
                                 decryptedTimestamp = decrypt(encryptedTimestamp, getPrivateKey("server"));
 
-                                // Now Encrypt the message and timestamp with the recipient's public key second step
+                                // Now Encrypt the message and timestamp with the recipient's public key second
+                                // step
                                 String encryptedMessage2 = encrypt(decryptedMessage, getPublicKey(recipientUserID));
                                 String encryptedTimestamp2 = encrypt(decryptedTimestamp, getPublicKey(recipientUserID));
 
@@ -188,6 +187,12 @@ class ClientHandler extends Thread {
                                 // to the
                                 // recipient
                                 // user ID
+
+                                System.out.println(
+                                        "Recipient: " + recipientUserID + "\nMessage: " + decryptedMessage
+                                                + "\nTimestamp: "
+                                                + LocalDateTime.now()
+                                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                             } catch (Exception e) {
                                 System.out.println("Failed to decrypt message or timestamp: " + e.getMessage());
                                 return;

@@ -127,17 +127,11 @@ class ClientHandler extends Thread {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             String hashedUserID = in.readLine(); // Receive hashed UserID from client
-            // String clientId = in.readLine(); // Receive ClientId from client
             String message; // Receive message from client
 
             if (hashedUserID != null) {
-                // if (clientId != null && hashedUserID != null) {
                 this.hashedUserID = hashedUserID;
-                // userName = clientId;
-
-                // System.out.println(message);
                 System.out.println(hashedUserID + " connected");
-                // System.out.println(clientId + " connected");
                 if (Server.userMessages.containsKey(hashedUserID)) {
                     int messageCount = Server.userMessages.get(hashedUserID).size();
                     out.println("There are " + messageCount + " message(s) for you.");

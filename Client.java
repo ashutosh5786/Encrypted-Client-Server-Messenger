@@ -1,10 +1,16 @@
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.*;
+import javax.crypto.*;
+import java.util.Base64;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public class Client {
     public static void main(String[] args) {
@@ -26,7 +32,9 @@ public class Client {
             System.out.println("Connected to chat server");
             System.out.flush();
 
-            out.println(userID); // Send the user's userID to the server immediately after connection
+            // Hash the UserID using MD5 algorithm
+            String hashedUserID = hashUserID(userID);
+            out.println(hashedUserID); // Send the hashed UserID to the server immediately after connection
 
             // Read and display messages from the server
             String serverMessage;
@@ -40,8 +48,24 @@ public class Client {
                                                                // message
                     System.out.println("Server: " + serverMessage);
                 } else {
-                    System.out.println("Server: " + serverMessage);
-                    messagesRead++;
+                    // Decrypt and display the message
+                    String[] parts = serverMessage.split(" ");
+                    String encryptedMessage = parts[0];
+                    String encryptedTimestamp = parts[1];
+                    String signature = parts[2];
+
+                    // Verify the signature
+                    PublicKey serverPublicKey = getPublicKey("server"); // Load server's public key
+                    if (verifySignature(encryptedMessage + " " + encryptedTimestamp, signature, serverPublicKey)) {
+                        // Decrypt the message and timestamp
+                        String decryptedMessage = decrypt(encryptedMessage, getPrivateKey(userID));
+                        String decryptedTimestamp = decrypt(encryptedTimestamp, getPrivateKey(userID));
+
+                        System.out.println("Server: " + decryptedMessage + " [Timestamp: " + decryptedTimestamp + "]");
+                        messagesRead++;
+                    } else {
+                        System.out.println("Invalid signature. Message ignored.");
+                    }
                 }
                 if (messagesRead >= messageCount) {
                     break;
@@ -57,20 +81,83 @@ public class Client {
                     System.out.println("Enter recipient userID:");
                     System.out.flush();
                     String recipientUserID = userInput.readLine();
-                    out.println(recipientUserID); // Send the recipient's userID to the server
 
                     System.out.println("Enter your message:");
                     System.out.flush();
                     String message = userInput.readLine();
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    out.println(timestamp + " " + message); // Send the timestamp and the message to the server
+
+                    // Encrypt the message and timestamp
+                    String encryptedMessage = encrypt(message, getPublicKey(recipientUserID));
+                    String encryptedTimestamp = encrypt(timestamp, getPublicKey(recipientUserID));
+
+                    // Generate signature for the encrypted message and timestamp
+                    String signature = sign(encryptedMessage + " " + encryptedTimestamp, getPrivateKey(userID));
+
+                    // Send the encrypted message, timestamp, and signature to the server
+                    out.println(encryptedMessage + " " + encryptedTimestamp + " " + signature + " " + recipientUserID);
                 }
             } while (response.equalsIgnoreCase("y"));
 
             System.out.println("Exiting...");
             socket.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String encrypt(String plainText, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    private static String decrypt(String encryptedText, PrivateKey privateKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
+        return new String(decryptedBytes);
+    }
+
+    private static String sign(String message, PrivateKey privateKey) throws Exception {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(message.getBytes());
+        byte[] signatureBytes = signature.sign();
+        return Base64.getEncoder().encodeToString(signatureBytes);
+    }
+
+    private static boolean verifySignature(String message, String signature, PublicKey publicKey) throws Exception {
+        Signature sign = Signature.getInstance("SHA256withRSA");
+        sign.initVerify(publicKey);
+        sign.update(message.getBytes());
+        return sign.verify(Base64.getDecoder().decode(signature));
+    }
+
+    private static String hashUserID(String userID) throws NoSuchAlgorithmException {
+        String secretString = "gfhk2024:";
+        String toHash = secretString + userID;
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] hashedBytes = md.digest(toHash.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashedBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    private static PrivateKey getPrivateKey(String userID) throws Exception {
+        byte[] keyBytes = Files.readAllBytes(Paths.get(userID + ".prv"));
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(spec);
+    }
+
+    private static PublicKey getPublicKey(String userID) throws Exception {
+        byte[] keyBytes = Files.readAllBytes(Paths.get(userID + ".pub"));
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(spec);
     }
 }

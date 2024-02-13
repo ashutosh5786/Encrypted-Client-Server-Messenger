@@ -30,11 +30,13 @@ public class Client {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
             System.out.println("Connected to chat server");
-            System.out.flush();
+            // System.out.flush();
 
             // Hash the UserID using MD5 algorithm
             String hashedUserID = hashUserID(userID);
             out.println(hashedUserID); // Send the hashed UserID to the server immediately after connection
+            // out.println(userID); // Send the UserID to the server immediately after
+            // connection
 
             // Read and display messages from the server
             String serverMessage;
@@ -46,9 +48,10 @@ public class Client {
                     String[] parts = serverMessage.split(" ");
                     messageCount = Integer.parseInt(parts[2]); // The number of messages is the third word in the
                                                                // message
-                    System.out.println("Server: " + serverMessage);
+                    // System.out.println("Server: " + serverMessage);
                 } else {
                     // Decrypt and display the message
+                    // System.out.println("Message from server: " + serverMessage);
                     String[] parts = serverMessage.split(" ");
                     String encryptedMessage = parts[0];
                     String encryptedTimestamp = parts[1];
@@ -57,7 +60,8 @@ public class Client {
                     // Verify the signature
                     PublicKey serverPublicKey = getPublicKey("server"); // Load server's public key
                     if (verifySignature(encryptedMessage + " " + encryptedTimestamp, signature, serverPublicKey)) {
-                        // Decrypt the message and timestamp
+
+                        // Decrypt the message and timestamp with client private key
                         String decryptedMessage = decrypt(encryptedMessage, getPrivateKey(userID));
                         String decryptedTimestamp = decrypt(encryptedTimestamp, getPrivateKey(userID));
 
@@ -79,7 +83,7 @@ public class Client {
                 response = userInput.readLine();
                 if (response.equalsIgnoreCase("y")) {
                     System.out.println("Enter recipient userID:");
-                    System.out.flush();
+                    // System.out.flush();
                     String recipientUserID = userInput.readLine();
 
                     System.out.println("Enter your message:");
@@ -87,20 +91,23 @@ public class Client {
                     String message = userInput.readLine();
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-                    // Encrypt the message and timestamp
-                    String encryptedMessage = encrypt(message, getPublicKey(recipientUserID));
-                    String encryptedTimestamp = encrypt(timestamp, getPublicKey(recipientUserID));
+                    // Encrypt the message and timestamp with seerver's public key
+                    String encryptedMessage = encrypt(message, getPublicKey("server"));
+                    String encryptedTimestamp = encrypt(timestamp, getPublicKey("server"));
 
                     // Generate signature for the encrypted message and timestamp
                     String signature = sign(encryptedMessage + " " + encryptedTimestamp, getPrivateKey(userID));
 
                     // Send the encrypted message, timestamp, and signature to the server
-                    out.println(encryptedMessage + " " + encryptedTimestamp + " " + signature + " " + recipientUserID);
+                    out.println(encryptedMessage + " " + encryptedTimestamp + " " + signature + " " + recipientUserID + " " + userID);                    
+                    // System.out.println(encryptedMessage + " " + encryptedTimestamp + " " +
+                    // signature + " " + recipientUserID);
+
                 }
             } while (response.equalsIgnoreCase("y"));
 
-            System.out.println("Exiting...");
             socket.close();
+            System.out.println("Exiting...");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -51,9 +51,13 @@ The server also hashes the recipient ID with MD5 and a secret string before stor
 ## Built With
 - Java
 ## Authors
-- Ashutosh Singh/@ashutosh5786
+- @ashutosh5786
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
 ## Acknowledgments
 Thanks to GitHub Copilot/Chat-GPT for assisting with the code.
+
+
+### NOTICE
+Generate your own keys and place them in root directory of the folder or modify the code to change directory.

@@ -35,8 +35,7 @@ public class Client {
             // Hash the UserID using MD5 algorithm
             String hashedUserID = hashUserID(userID);
             out.println(hashedUserID); // Send the hashed UserID to the server immediately after connection
-            // out.println(userID); // Send the UserID to the server immediately after
-            // connection
+
 
             // Read and display messages from the server
             String serverMessage;
@@ -48,10 +47,8 @@ public class Client {
                     String[] parts = serverMessage.split(" ");
                     messageCount = Integer.parseInt(parts[2]); // The number of messages is the third word in the
                                                                // message
-                    // System.out.println("Server: " + serverMessage);
                 } else {
                     // Decrypt and display the message
-                    // System.out.println("Message from server: " + serverMessage);
                     String[] parts = serverMessage.split(" ");
                     String encryptedMessage = parts[0];
                     String encryptedTimestamp = parts[1];
@@ -100,8 +97,7 @@ public class Client {
 
                     // Send the encrypted message, timestamp, and signature to the server
                     out.println(encryptedMessage + " " + encryptedTimestamp + " " + signature + " " + recipientUserID + " " + userID);                    
-                    // System.out.println(encryptedMessage + " " + encryptedTimestamp + " " +
-                    // signature + " " + recipientUserID);
+
 
                 }
             } while (response.equalsIgnoreCase("y"));

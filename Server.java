@@ -182,11 +182,6 @@ class ClientHandler extends Thread {
 
                                 // Broadcast the messaage for the message to store in the userMessages step four
                                 Server.broadcastMessage(reMessage, userName, hashedRecipientUserID, recipientUserID); // Broadcast
-                                // the
-                                // message
-                                // to the
-                                // recipient
-                                // user ID
 
                                 System.out.println(
                                         "Recipient: " + recipientUserID + "\nMessage: " + decryptedMessage
@@ -214,7 +209,6 @@ class ClientHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         } finally {
             try {

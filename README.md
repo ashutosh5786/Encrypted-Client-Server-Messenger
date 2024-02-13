@@ -1,4 +1,4 @@
-# Project Title
+# Encrypted Chat Application
 
 This project is a simple client-server application implemented in Java. The server accepts connections from multiple clients and handles their requests concurrently. The clients send encrypted messages to the server, which are then decrypted and stored by the server.
 

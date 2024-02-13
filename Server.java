@@ -3,17 +3,23 @@ import java.net.*;
 import java.util.*;
 
 public class Server {
-    private static final int PORT = 80;
+    private static int PORT;
     private static final Map<String, ClientHandler> clients = new HashMap<>();
     public static Map<String, List<String>> userMessages = new HashMap<>();
 
     public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Syntax: java Server <port number>");
+            return;
+        }
+
+        PORT = Integer.parseInt(args[0]);
+
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Chat Server is running on port " + PORT);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clientHandler.start();
             }
@@ -94,6 +100,3 @@ class ClientHandler extends Thread {
         return userName;
     }
 }
-
-
-
